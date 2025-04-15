@@ -1,0 +1,149 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+h1 {
+    color: #2c3e50;
+}
+
+h2 {
+    margin: 15px 0;
+    color: #3498db;
+}
+
+.task-form {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#task-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 16px;
+}
+
+#add-task {
+    padding: 10px 15px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+#add-task:hover {
+    background: #2980b9;
+}
+
+#tasks-list {
+    list-style-type: none;
+}
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    border-left: 5px solid #3498db;
+}
+
+.task-item.completed {
+    border-left-color: #2ecc71;
+    background-color: #f0f8f0;
+}
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    color: #7f8c8d;
+}
+
+.task-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+    transition: opacity 0.3s;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+.btn-complete {
+    background-color: #2ecc71;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+}
+
+.loading {
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.empty-list {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+    font-style: italic;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.api-info {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+#api-status {
+    margin-top: 5px;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+

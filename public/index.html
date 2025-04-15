@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Tâches - Projet DevOps</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestionnaire de Tâches</h1>
+            <p>Projet DevOps</p>
+        </header>
+
+        <div class="task-form">
+            <input type="text" id="task-input" placeholder="Ajouter une nouvelle tâche...">
+            <button id="add-task">Ajouter</button>
+        </div>
+
+        <div class="tasks-container">
+            <h2>Mes Tâches</h2>
+            <ul id="tasks-list">
+                <!-- Les tâches seront ajoutées ici dynamiquement -->
+                <li class="loading">Chargement des tâches...</li>
+            </ul>
+        </div>
+
+        <div class="api-info">
+            <h3>Informations API</h3>
+            <div id="api-status">Statut: Vérification...</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

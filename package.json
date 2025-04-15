@@ -1,0 +1,26 @@
+{
+  "name": "todo-api-devops",
+  "version": "1.0.0",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "keywords": [ "devops", "todo", "api", "nodejs", "express"],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongoose": "^8.13.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.24.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.1.0"
+  }
+}
