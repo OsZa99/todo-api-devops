@@ -1,6 +1,7 @@
+version: '3.8'
 services:
   api:
-    build: username/todo-api-devops:latest
+    build:
       context: .
       dockerfile: Dockerfile
     ports:

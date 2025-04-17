@@ -35,13 +35,11 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build with Docker Compose
-        run: docker compose build api
-
-      - name: Tag and Push to Docker Hub
+      - name: Build Docker image
         run: |
-          COMPOSE_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "_api" | head -n 1)
-          docker compose build
-          docker tag $COMPOSE_IMAGE ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api-devops:latest
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api-devops:latest .
+
+      - name: Push to Docker Hub
+        run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api-devops:latest
           
