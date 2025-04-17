@@ -16,9 +16,7 @@ jest.mock('mongoose', () => {
     connect: jest.fn().mockResolvedValue(true),
     Schema: originalModule.Schema,
     model: jest.fn().mockReturnValue({
-      find: jest.fn().mockResolvedValue([
-        { _id: '1', title: 'Test task', completed: false }
-      ]),
+      find: mockFind,
       findByIdAndUpdate: jest.fn().mockResolvedValue({ _id: '1', title: 'Updated task' }),
       findByIdAndDelete: jest.fn().mockResolvedValue({ _id: '1' }),
       save: jest.fn().mockImplementation(function() {
