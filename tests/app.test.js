@@ -26,7 +26,7 @@ jest.mock('mongoose', () => {
 describe('API Routes', () => {
   describe('GET /api', () => {
     it('should return welcome message', async () => {
-      const res = await request(app).get('/');
+      const res = await request(app).get('/api');
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty('message');
     });
