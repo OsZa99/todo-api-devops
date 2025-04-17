@@ -6,6 +6,11 @@ const app = require('../src/app');
 // Mock pour mongoose
 jest.mock('mongoose', () => {
   const originalModule = jest.requireActual('mongoose');
+  const mockFind = jest.fn().mockReturnValue({
+    sort: jest.fn().mockResolvedValue([
+      { _id: '1', title: 'Test task', completed: false }
+    ])
+  });
   return {
     ...originalModule,
     connect: jest.fn().mockResolvedValue(true),
