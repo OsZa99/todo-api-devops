@@ -1,11 +1,11 @@
 name: CI/CD Pipeline
-
+ 
 on:
   push:
-    branches: [main, develop, feature/github-actions-pipeline]
+    branches: [main, develop, feature/githubActions]
   pull_request:
     branches: [main]
-
+ 
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,15 +19,16 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
-
-
+        
   build:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       - name: Docker build
-        run: docker-compose build
+        run: docker compose build
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
