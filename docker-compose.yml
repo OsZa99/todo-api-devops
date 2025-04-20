@@ -11,9 +11,6 @@ services:
     volumes:
       - ./src:/app/src
       - ./public:/app/public
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - ./node_modules:/app/node_modules
       - ./.env:/app/.env
     depends_on:
       - mongo
