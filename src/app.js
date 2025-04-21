@@ -2,11 +2,32 @@ const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const path = require('path');
+const promClient = require('prom-client');
 
 // Initialisation
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todo_app';
+
+// Initialisation Prometheus 
+const register = new promClient.Registry();
+promClient.collectDefaultMetrics({ register });
+
+// Compteur pour les requêtes HTTP
+const httpRequestCounter = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status'],
+  registers: [register]
+});
+
+// Histogramme pour les temps de réponse
+const httpRequestDuration = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Durée des requêtes HTTP en secondes',
+  labelNames: ['method', 'route', 'status'],
+  registers: [register]
+});
 
 // Middlewares
 app.use(express.json());
@@ -14,6 +35,36 @@ app.use(morgan('combined'));
 
 // Servir les fichiers statiques depuis le dossier 'public'
 app.use(express.static(path.join(__dirname, '../public')));
+
+
+// Middleware pour compter les requêtes - ajouter avant les routes
+app.use((req, res, next) => {
+  // Capture le temps de début
+  const start = Date.now();
+  
+  // Intercepte la méthode res.end pour capturer les métriques avant la fin
+  const originalEnd = res.end;
+  res.end = function() {
+    // Calcule la durée
+    const duration = (Date.now() - start) / 1000;
+    
+    // Capture la route (si c'est une route dynamique, simplifie-la)
+    let route = req.originalUrl || req.url;
+    // Simplifie les routes avec IDs (ex: /api/tasks/123 → /api/tasks/:id)
+    route = route.replace(/\/api\/tasks\/[^/]+/, '/api/tasks/:id');
+    
+    // Incrémente le compteur de requêtes
+    httpRequestCounter.labels(req.method, route, res.statusCode).inc();
+    
+    // Observe le temps de réponse
+    httpRequestDuration.labels(req.method, route, res.statusCode).observe(duration);
+    
+    // Appelle la méthode originale
+    return originalEnd.apply(this, arguments);
+  };
+  
+  next();
+});
 
 // Modèle de données
 const TaskSchema = new mongoose.Schema({
@@ -89,6 +140,12 @@ app.delete('/api/tasks/:id', async (req, res) => {
 // Route pour la page d'accueil
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Endpoint pour les métriques - ajouter avec les autres routes
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
 });
 
 // Démarrage

@@ -6,14 +6,17 @@ const app = require('../src/app');
 // Mock pour mongoose
 jest.mock('mongoose', () => {
   const originalModule = jest.requireActual('mongoose');
+  const mockFind = jest.fn().mockReturnValue({
+    sort: jest.fn().mockResolvedValue([
+      { _id: '1', title: 'Test task', completed: false }
+    ])
+  });
   return {
     ...originalModule,
     connect: jest.fn().mockResolvedValue(true),
     Schema: originalModule.Schema,
     model: jest.fn().mockReturnValue({
-      find: jest.fn().mockResolvedValue([
-        { _id: '1', title: 'Test task', completed: false }
-      ]),
+      find: mockFind,
       findByIdAndUpdate: jest.fn().mockResolvedValue({ _id: '1', title: 'Updated task' }),
       findByIdAndDelete: jest.fn().mockResolvedValue({ _id: '1' }),
       save: jest.fn().mockImplementation(function() {
@@ -24,9 +27,9 @@ jest.mock('mongoose', () => {
 });
 
 describe('API Routes', () => {
-  describe('GET /', () => {
+  describe('GET /api', () => {
     it('should return welcome message', async () => {
-      const res = await request(app).get('/');
+      const res = await request(app).get('/api');
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty('message');
     });
