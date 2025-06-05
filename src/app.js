@@ -17,7 +17,7 @@ promClient.collectDefaultMetrics({ register });
 const httpRequestCounter = new promClient.Counter({
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status'],
+  labelNames: ['method', 'route', 'status_code'],
   registers: [register]
 });
 
@@ -25,7 +25,8 @@ const httpRequestCounter = new promClient.Counter({
 const httpRequestDuration = new promClient.Histogram({
   name: 'http_request_duration_seconds',
   help: 'Durée des requêtes HTTP en secondes',
-  labelNames: ['method', 'route', 'status'],
+  labelNames: ['method', 'route', 'status_code'],
+  buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1, 2], 
   registers: [register]
 });
 
@@ -42,15 +43,20 @@ app.use((req, res, next) => {
   // Capture le temps de début
   const start = Date.now();
   
-  // Intercepte la méthode res.end pour capturer les métriques avant la fin
-  const originalEnd = res.end;
-  res.end = function() {
+  res.on('finish', () => {
     // Calcule la durée
     const duration = (Date.now() - start) / 1000;
     
-    // Capture la route (si c'est une route dynamique, simplifie-la)
-    let route = req.originalUrl || req.url;
-    // Simplifie les routes avec IDs (ex: /api/tasks/123 → /api/tasks/:id)
+    // Simplification de la route...
+    let route;
+    if (req.route && req.route.path) {
+      // Si la route est déclarée avec Express (ex: router.get('/api/tasks/:id', ...))
+      route = req.baseUrl + req.route.path;
+    } else {
+      // Sinon on retombe sur originalUrl
+      route = req.originalUrl || req.url;
+    }
+    // Appliquer la même regexp de simplification pour /api/tasks/:id
     route = route.replace(/\/api\/tasks\/[^/]+/, '/api/tasks/:id');
     
     // Incrémente le compteur de requêtes
@@ -59,10 +65,7 @@ app.use((req, res, next) => {
     // Observe le temps de réponse
     httpRequestDuration.labels(req.method, route, res.statusCode).observe(duration);
     
-    // Appelle la méthode originale
-    return originalEnd.apply(this, arguments);
-  };
-  
+  });
   next();
 });
 
@@ -144,8 +147,12 @@ app.get('/', (req, res) => {
 
 // Endpoint pour les métriques - ajouter avec les autres routes
 app.get('/metrics', async (req, res) => {
-  res.set('Content-Type', register.contentType);
-  res.end(await register.metrics());
+  try {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  } catch (ex) {
+    res.status(500).end(ex);
+  }
 });
 
 // Démarrage
