@@ -1,8 +1,8 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline with GitOps
 
 on:
   push:
-    branches: [main, develop, feature/github-actions-pipeline]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 
@@ -35,11 +35,35 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api-devops:latest .
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api:${{ github.sha }}
 
-      - name: Push to Docker Hub
-        run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api-devops:latest
+  update-gitops:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.actor }}/todo-api-gitops
+          token: ${{ secrets.GITOPS_TOKEN }}
           
+      - name: Update image tag
+        run: |
+          cd environments/dev
+          sed -i "s|newTag: .*|newTag: ${{ github.sha }}|" kustomization.yaml
+          
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update image tag to ${{ github.sha }}"
+          git push
