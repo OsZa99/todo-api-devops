@@ -55,7 +55,7 @@ jobs:
           
       - name: Commit and push
         run: |
-          sed -i "s|newTag: .*|newTag: ${{ github.sha }}|" k8s/kustomization.yaml
+          sed -i "s|newTag: .*|newTag: ${{ github.sha }}|" k8s/kustomization.yml
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add .
