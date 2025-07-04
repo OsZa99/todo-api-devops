@@ -2,8 +2,6 @@ name: CI/CD Pipeline with GitOps
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
     branches: [main]
 
 jobs:
@@ -11,12 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
       - name: Install dependencies
         run: npm ci
+
       - name: Run tests
         run: npm test
 
@@ -40,14 +41,11 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/todo-api:${{ github.sha }}
 
   update-gitops:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout GitOps repository
         uses: actions/checkout@v3
@@ -55,13 +53,9 @@ jobs:
           repository: ${{ github.actor }}/todo-api-gitops
           token: ${{ secrets.GITOPS_TOKEN }}
           
-      - name: Update image tag
-        run: |
-          cd environments/dev
-          sed -i "s|newTag: .*|newTag: ${{ github.sha }}|" kustomization.yaml
-          
       - name: Commit and push
         run: |
+          sed -i "s|newTag: .*|newTag: ${{ github.sha }}|" k8s/kustomization.yaml
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add .
